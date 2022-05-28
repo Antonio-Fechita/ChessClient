@@ -6,6 +6,7 @@ import com.example.chessclient.Drawing.Enums.ChessColor;
 import com.example.chessclient.Drawing.Enums.ChessPiece;
 import com.example.chessclient.Drawing.Enums.TableOrientation;
 import com.example.chessclient.Piece;
+import com.example.chessclient.Threads.BoardListener;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -50,8 +51,7 @@ public class PlayingScene implements Drawable {
         chat.drawChat(layout);
         placePieces(layout, pov);
         scene = new Scene(layout, 8 * tileLength + chatWidth, 8 * tileLength);
-        //new Thread(new BoardListener(client,chat,this)).start();
-        //scene.getStylesheets().add(getClass().getResource("/button.css").toExternalForm());
+        new Thread(new BoardListener(client,chat,this)).start();
     }
 
 

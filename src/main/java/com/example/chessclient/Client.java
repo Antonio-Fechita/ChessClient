@@ -4,47 +4,23 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
-public class Client extends Thread {
+public class Client extends Thread
+{
     public volatile String latestCommand = null;
     public volatile String latestResponse = "--idle--";
-    List<String> commandsQueue = new ArrayList<>();
 
-    public void setLastCommand(String newCommand) {
-        commandsQueue.add(newCommand);
+    public void setLatestCommand(String newCommand)
+    {
+        latestCommand = newCommand;
     }
 
-    public void setFirstCommand(String newCommand) {
-        if (commandsQueue.size() == 0)
-            commandsQueue.add(newCommand);
-        else
-            commandsQueue.add(0, newCommand);
-
-    }
-
-    public String getLatestResponse(boolean forBoardListener) {
-        if (forBoardListener)
-            while (!latestResponse.startsWith("%")) ;
-        else {
-            while (latestResponse.equals("--idle--") || latestResponse.startsWith("%")) ;
-        }
+    public String getLatestResponse() {
         return latestResponse;
     }
 
-    public String getResponseForCommand(String command, boolean hasPriority, boolean includingBoardListener) {
-        if (hasPriority) {
-            setFirstCommand(command);
-//            System.out.println("Command sent with priority: " + command);
-//            System.out.println("Confirmation: " + commandsQueue.get(0));
-        } else
-            setLastCommand(command);
-        return getLatestResponse(includingBoardListener);
-    }
-
-
-    public void run() {
+    public void run()
+    {
         String serverAddress = "127.0.0.1"; // The server's IP address
         int PORT = 8100; // The server's port
         try (
@@ -59,43 +35,34 @@ public class Client extends Thread {
 
                 String command;
 
-//                if (latestCommand != null)
-//                {
-//                    commandsQueue.add(0,latestCommand);
-//                    latestCommand = null;
-//                }
-//                else
-//                {
-//                    commandsQueue.add(0,"idle");
-//                }
-
-
-//                if(commandsQueue.size()==0){
-//                    commandsQueue.add("idle");
-//                }
-
-
-                if (commandsQueue.size() > 0) {
-                    builder.append(commandsQueue.get(0));
-                    commandsQueue.remove(0);
-                    if (!builder.toString().endsWith("idle") && !builder.toString().endsWith("boardStatus"))
-                        System.out.println("COMMAND SENT: " + builder);
-                    out.println(builder);
+                if (latestCommand != null)
+                {
+                    command = latestCommand;
+                    latestCommand = null;
                 }
-                if(in.ready()){
-                    latestResponse = in.readLine();
+                else
+                {
+                    command = "idle";
                 }
 
-                if (!latestResponse.startsWith("%") && !latestResponse.startsWith("--idle--"))
-                    System.out.println("RESPONSE RECEIVED [" + latestResponse + "]");
+                if (command.equals("exit"))
+                    break;
+
+                builder.append(command);
+//                System.out.println("Sent command: " + builder);
+                out.println(builder);
+                latestResponse = in.readLine();
+//                System.out.println("Latest response: " + latestResponse);
                 String[] lookForToken = latestResponse.split("%");
                 if (lookForToken[0].equals("#@Tkn") && lookForToken.length == 2)
                     AuthenticationToken.setAuthenticationToken(lookForToken[1]);
 
-
+                if ( !latestResponse.equals("--idle--") )
+                    System.out.println(latestResponse);
             } while (true);
         } catch (Exception e) {
-            // System.err.println("No server listening... " + e);
+            System.err.println("No server listening... " + e);
+            System.out.println(e.getMessage());
         }
     }
 

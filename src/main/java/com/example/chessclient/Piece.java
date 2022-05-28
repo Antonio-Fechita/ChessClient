@@ -43,12 +43,12 @@ public class Piece {
             System.out.println("Moving " + color.toString().toLowerCase() + " " + piece.toString().toLowerCase() + " from " + tile + " to "
                     + getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength));
 
-            client.setFirstCommand("move " + tile + "-" + getTileFromCoordinates((int)
+            client.setLatestCommand("move " + tile + "-" + getTileFromCoordinates((int)
                                     mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength));
 
             String response;
             do{
-                response = client.getLatestResponse(false);
+                response = client.getLatestResponse();
             }while (!response.startsWith("PLEASE") && !response.startsWith("INVALID MOVE") && !response.startsWith("MOVE"));
 
             if (response.equals("MOVE WAS APPLIED!")) { //if move is allowed by server

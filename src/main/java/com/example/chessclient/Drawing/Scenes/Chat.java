@@ -284,7 +284,7 @@ public class Chat {
         String message = messageArea.getText();
         //addMessage(message, true, true,contentsOfScrollPane);
         messageArea.setText("");
-        client.setFirstCommand("gameMessage " + message);
+        client.setLatestCommand("gameMessage " + message);
     }
 
     private void onForfeitButtonPress(){

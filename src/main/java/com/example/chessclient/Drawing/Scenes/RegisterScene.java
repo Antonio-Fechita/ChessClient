@@ -146,11 +146,24 @@ public class RegisterScene implements Drawable {
             SequentialTransition transition = new SequentialTransition(wrongPasswordGroup, fader);
             transition.play();
         } else {
-            String response = client.getResponseForCommand("register " + username + " " + password,true,false);
-            response = client.getResponseForCommand("login " + username + " " + password,true,false);
+            client.setLatestCommand("register " + username + " " + password);
+            String response;
+            do {
+                response = client.getLatestResponse();
+            } while (!response.startsWith("USER") && !response.startsWith("REGISTRATION"));
 
-            //to check responses
-            sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+            if (response.startsWith("USER")) { //registration successful
+
+                client.setLatestCommand("login " + username + " " + password);
+                do {
+                    response = client.getLatestResponse();
+                } while (!response.startsWith("#@Tkn%"));
+
+                sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+            } else { //registration failed
+                System.out.println("Registration failed");
+            }
+
         }
 
     }
