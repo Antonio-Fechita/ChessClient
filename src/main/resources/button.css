@@ -1,0 +1,21 @@
+
+.button{
+    -fx-border-color: #d99551;
+    -fx-border-width: 10;
+    -fx-border-radius: 10;
+    -fx-background-color: transparent;
+    -fx-font-family:"Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 50;
+    -fx-text-fill: #828282;
+}
+
+
+.button:hover {
+    -fx-border-color: #8ed951;
+    -fx-text-fill: #ffffff;
+}
+
+.button:pressed {
+    -fx-border-color: #f60e0e;
+    -fx-text-fill: #ffffff;
+}

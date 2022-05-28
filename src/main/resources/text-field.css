@@ -1,0 +1,18 @@
+.text-field{
+    -fx-text-fill: #000000;
+    -fx-background-color: transparent;
+    -fx-border-color: #000000;
+    -fx-border-width: 8;
+    -fx-border-radius: 5;
+    -fx-font-size: 40;
+}
+
+/*.button{*/
+/*    -fx-border-color: #d99551;*/
+/*    -fx-border-width: 10;*/
+/*    -fx-border-radius: 10;*/
+/*    -fx-background-color: transparent;*/
+/*    -fx-font-family:"Segoe UI", Helvetica, Arial, sans-serif;*/
+/*    -fx-font-size: 50;*/
+/*    -fx-text-fill: #828282;*/
+/*}*/
