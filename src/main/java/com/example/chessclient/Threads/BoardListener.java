@@ -16,16 +16,17 @@ public class BoardListener implements Runnable {
     Chat chat;
     double timeFirstPlayer;
     double timeSecondPlayer;
-    int numberOfMoves;
+    int numberOfMoves, lastKnownNumberOfMoves = -1;
     String lastMove;
     int numberOfMessages, lastNumberOfMessages = 0;
+    int numberOfServerMessages = -1;
     List<String> messages;
 
     PlayingScene playingScene;
 
     boolean isStopped;
 
-    private final static double SECONDS_PER_FRAME = 1 / 60.0;
+    private final static double SECONDS_PER_FRAME = 1 / 30.0;
 
     public BoardListener(Client client, Chat chat, PlayingScene playingScene) {
         this.client = client;
@@ -55,69 +56,100 @@ public class BoardListener implements Runnable {
 
             String response = client.getLatestResponse();
 
-            if (!response.startsWith("%"))
-                continue;
-
-
-//            try {
-//                TimeUnit.SECONDS.sleep(3);
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-
-            String[] breakdown = response.split("%");
-
-            timeFirstPlayer = Double.parseDouble(breakdown[2].split("&")[0].split("-")[1]);
-            nameFirstPlayer = breakdown[2].split("&")[0].split("-")[0];
-            timeSecondPlayer = Double.parseDouble(breakdown[2].split("&")[1].split("-")[1]);
-            nameSecondPlayer = breakdown[2].split("&")[1].split("-")[0];
-
-
-            numberOfMoves = Integer.parseInt(breakdown[3].split("-")[1]);
-            List<String> moves = Arrays.asList(breakdown[4].split("&"));
-            lastMove = moves.get(moves.size() - 1);
-
-            numberOfMessages = Integer.parseInt(breakdown[5].split("-")[1]);
-            List<String> messages = Arrays.asList(breakdown[6].split("&"));
-
-            for (int i = 0; i < messages.size(); i++) {
-                if (messages.get(i).startsWith(nameFirstPlayer)) {
-                    messages.set(i, messages.get(i).replaceFirst(nameFirstPlayer, "1"));
-                } else {
-                    messages.set(i, messages.get(i).replaceFirst(nameSecondPlayer, "2"));
-                }
-            }
-
-//                System.out.println("-------------------------------------");
-//                System.out.println(response);
-//                System.out.println(timeFirstPlayer);
-//                System.out.println(timeSecondPlayer);
-//                //System.out.println(moves);
-//                System.out.println(lastMove);
-//                System.out.println(nameFirstPlayer);
-//                System.out.println(nameSecondPlayer);
-//                System.out.println(numberOfMessages);
-//                System.out.println(messages);
-
-            if (numberOfMessages != lastNumberOfMessages) {
-                int numberOfMessagesToAdd = numberOfMessages - lastNumberOfMessages;
-                for (int i = numberOfMessagesToAdd; i > 0; i--) {
-                    String message = messages.get(messages.size() - i);
-                    if ((message.charAt(0) == '1' && playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)) ||
-                            (message.charAt(0) == '2' && playingScene.getPov().equals(TableOrientation.BLACK_PLAYING))) {
-                        Platform.runLater(() -> chat.addMessage(message.substring(2), true, true, chat.getContentsOfScrollPane()));
-                    } else {
-                        Platform.runLater(() -> chat.addMessage(message.substring(2), false, true, chat.getContentsOfScrollPane()));
+            if (!response.startsWith("%")) {
+                if (!response.equals("--idle--") && !response.equals("MOVE WAS APPLIED!") &&
+                        !response.equals("MESSAGE SENT!") && !response.equals("Make a move!")) {
+                    int numberOfMessagesReceived = client.getNumberOfMessagesReceived();
+                    if (numberOfMessagesReceived != numberOfServerMessages) {
+                        Platform.runLater(() -> chat.addMessage(response, false, false, chat.getContentsOfScrollPane()));
+                        numberOfServerMessages = numberOfMessagesReceived;
                     }
                 }
-                lastNumberOfMessages = numberOfMessages;
+                continue;
             }
 
-            if ((numberOfMoves % 2 == 0 && playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)) ||
-                    ((numberOfMoves % 2 == 1) && playingScene.getPov().equals(TableOrientation.BLACK_PLAYING))) {
-                Piece piece = playingScene.getPieceAtTile(lastMove.substring(0, 2));
-                if (piece != null)
-                    piece.placePieceAtTile(lastMove.substring(3), playingScene.getPov(), playingScene.getTileLength());
+
+            String[] breakdown = response.split("%");
+            //System.out.println("boardListener response: " + response);
+            try {
+                timeFirstPlayer = Double.parseDouble(breakdown[2].split("&")[0].split("-")[1]);
+                nameFirstPlayer = breakdown[2].split("&")[0].split("-")[0];
+                timeSecondPlayer = Double.parseDouble(breakdown[2].split("&")[1].split("-")[1]);
+                nameSecondPlayer = breakdown[2].split("&")[1].split("-")[0];
+
+
+                numberOfMoves = Integer.parseInt(breakdown[3].split("-")[1]);
+                List<String> moves = Arrays.asList(breakdown[4].split("&"));
+                lastMove = moves.get(moves.size() - 1);
+
+                numberOfMessages = Integer.parseInt(breakdown[5].split("-")[1]);
+                List<String> messages = Arrays.asList(breakdown[6].split("&"));
+
+                for (int i = 0; i < messages.size(); i++) {
+                    if (messages.get(i).startsWith(nameFirstPlayer)) {
+                        messages.set(i, messages.get(i).replaceFirst(nameFirstPlayer, "1"));
+                    } else {
+                        messages.set(i, messages.get(i).replaceFirst(nameSecondPlayer, "2"));
+                    }
+                }
+
+
+                if (numberOfMessages != lastNumberOfMessages) {
+
+                    System.out.println("fix messages");
+
+                    int numberOfMessagesToAdd = numberOfMessages - lastNumberOfMessages;
+                    for (int i = numberOfMessagesToAdd; i > 0; i--) {
+                        String message = messages.get(messages.size() - i);
+                        if ((message.charAt(0) == '1' && playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)) ||
+                                (message.charAt(0) == '2' && playingScene.getPov().equals(TableOrientation.BLACK_PLAYING))) {
+                            Platform.runLater(() -> chat.addMessage(message.substring(2), true, true, chat.getContentsOfScrollPane()));
+                        } else {
+                            Platform.runLater(() -> chat.addMessage(message.substring(2), false, true, chat.getContentsOfScrollPane()));
+                        }
+                    }
+                    lastNumberOfMessages = numberOfMessages;
+                }
+
+                if ((numberOfMoves % 2 == 0 && playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)) ||
+                        ((numberOfMoves % 2 == 1) && playingScene.getPov().equals(TableOrientation.BLACK_PLAYING)) &&
+                                numberOfMoves > lastKnownNumberOfMoves) {
+
+                    System.out.println("fix moves");
+
+                    Piece piece = playingScene.getPieceAtTile(lastMove.substring(0, 2));
+                    if (piece != null) { //should always be true
+                        Piece pieceToBeRemoved = playingScene.getPieceAtTile(lastMove.substring(3));
+
+                        if (pieceToBeRemoved == null) {
+                            System.out.println("Piece to be removed is null");
+                        } else {
+                            System.out.println(pieceToBeRemoved.getColor() + " " + pieceToBeRemoved.getPiece());
+                        }
+                        Platform.runLater(() -> {
+                            playingScene.removePiece(pieceToBeRemoved);
+                            piece.placePieceAtTile(lastMove.substring(3), playingScene.getPov(), playingScene.getTileLength());
+                        });
+                    }
+                    lastKnownNumberOfMoves = numberOfMoves;
+                }
+
+
+                if(playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)){
+                    Platform.runLater(() -> {
+                        chat.setMyTimer(timeFirstPlayer);
+                        chat.setOpponentTimer(timeSecondPlayer);
+                    });
+                }
+                else{
+                    Platform.runLater(() ->{
+                        chat.setMyTimer(timeSecondPlayer);
+                        chat.setOpponentTimer(timeFirstPlayer);
+                    });
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println(e.getMessage());
+                System.out.println(response);
             }
 
         }

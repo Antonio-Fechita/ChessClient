@@ -10,6 +10,8 @@ public class Client extends Thread
     public volatile String latestCommand = null;
     public volatile String latestResponse = "--idle--";
 
+    int numberOfMessagesReceived = 0;
+
     public void setLatestCommand(String newCommand)
     {
         latestCommand = newCommand;
@@ -17,6 +19,10 @@ public class Client extends Thread
 
     public String getLatestResponse() {
         return latestResponse;
+    }
+
+    public int getNumberOfMessagesReceived() {
+        return numberOfMessagesReceived;
     }
 
     public void run()
@@ -52,13 +58,16 @@ public class Client extends Thread
 //                System.out.println("Sent command: " + builder);
                 out.println(builder);
                 latestResponse = in.readLine();
+
+                if(!latestResponse.equals("--idle--"))
+                    numberOfMessagesReceived++;
 //                System.out.println("Latest response: " + latestResponse);
                 String[] lookForToken = latestResponse.split("%");
                 if (lookForToken[0].equals("#@Tkn") && lookForToken.length == 2)
                     AuthenticationToken.setAuthenticationToken(lookForToken[1]);
 
-                if ( !latestResponse.equals("--idle--") )
-                    System.out.println(latestResponse);
+//                if ( !latestResponse.equals("--idle--") )
+//                    System.out.println(latestResponse);
             } while (true);
         } catch (Exception e) {
             System.err.println("No server listening... " + e);

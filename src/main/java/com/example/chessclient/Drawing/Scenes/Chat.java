@@ -18,9 +18,14 @@ public class Chat {
     int chatPanelWidth;
     int chessTableLength;
     int chatTitleHeight;
+
+    int timerHeight;
     int sendMessageRectangleHeight;
     Pane contentsOfScrollPane;
     String opponentName = "opponent";
+    Pane layout;
+    Text myTimer;
+    Text opponentTimer;
     //
     int lastMessageY;
     TextArea messageArea;
@@ -32,99 +37,28 @@ public class Chat {
         return contentsOfScrollPane;
     }
 
-    public Chat(int tileLength, Client client) {
+    public Chat(int tileLength, Client client, Pane layout) {
         this.chatPanelWidth = 4 * tileLength;
         this.chatTitleHeight = (int) (tileLength / 2.5);
         this.chessTableLength = 8 * tileLength;
         this.sendMessageRectangleHeight = 2 * tileLength;
+        this.timerHeight = (int) (tileLength * 0.7);
         this.client = client;
+        this.layout = layout;
         contentsOfScrollPane = new Pane();
         lastMessageY = 0;
     }
 
-    public void drawChat(Pane layout) {
+    public void drawChat() {
+        drawTimer(layout);
         drawChatTitle(layout);
         drawMessageSender(layout);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setLayoutX(chessTableLength);
-        scrollPane.setLayoutY(chatTitleHeight);
-        scrollPane.setMaxSize(chatPanelWidth, chessTableLength - (chatTitleHeight + sendMessageRectangleHeight));
+        scrollPane.setLayoutY(chatTitleHeight + timerHeight);
+        scrollPane.setMaxSize(chatPanelWidth, chessTableLength - (chatTitleHeight + sendMessageRectangleHeight + timerHeight));
 
-//        for (int i = 0; i <= 1000; i++) {
-//            Text text = new Text("Some text " + i);
-//            box.getChildren().add(text);
-//        }
-
-        //to delete later
-//        addMessage("duten pizda matii", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda matii", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda matii", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda matii", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda matii, miai adus marfa?", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda matii", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("da tiam aduso", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda matii, cat costa", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("6 ron", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("nu platesc asa de mult pentru o bucata de drog", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda matii daca nu vrei sa platesti nu platesti si atunci nu ai drog", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("dar am nevoie de drog, ma doare aici", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("...", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("...", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("sorata ce mai face", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("e la munca in italia", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("daon pula mea", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("bine til las cu 5 ron", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("ai si drogul.. marihuana?", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("vorbeste mai incet", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//        addMessage("de unde sa am drogul marihuana?", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("hai nu mai fa, nu mai face pe prostul", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//        addMessage("ai sau nu?", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("imi datorezi bani", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("duten pizda mati", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("dute tu in pizda matii, de unde sati dau eu bani?", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("dami banii mei sau te omor.. cu cutitul", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("*pune cutitul inapoi* tii dau maine", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("asta e ultima pasuire, chiriac, iti omor familia si pe sorata, ai inteles?", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("chill omule, nu e nicio problema", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("uite banii", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("...", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("asta e marfa.. cu asta.. esti aspirator de gagici", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("...", true,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-//
-//        addMessage("...*poc*.. cea cazut?", false,Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20),contentsOfScrollPane);
-        //
 
         scrollPane.setContent(contentsOfScrollPane);
         scrollPane.setLayoutX(chessTableLength);
@@ -134,12 +68,42 @@ public class Chat {
 
     }
 
+    public void setMyTimer(double time) {
+        myTimer.setText("My time: " + time);
+    }
+
+    public void setOpponentTimer(double time) {
+        opponentTimer.setText("Opponent time: " + time);
+    }
+
+    private void drawTimer(Pane layout){
+        Rectangle timerRectangle = new Rectangle();
+        timerRectangle.setX(chessTableLength);
+        timerRectangle.setY(0);
+        timerRectangle.setWidth(chatPanelWidth);
+        timerRectangle.setHeight(timerHeight);
+        timerRectangle.setFill(Color.TRANSPARENT);
+        myTimer = new Text("My timer: ");
+        myTimer.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 25));
+        myTimer.setX(chessTableLength + chatPanelWidth/20);
+        myTimer.setY(timerHeight/2);
+        opponentTimer = new Text("Opponent timer: ");
+        opponentTimer.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 25));
+        opponentTimer.setX(myTimer.getX());
+        opponentTimer.setY(myTimer.getY() + Utilities.getTextHeight(opponentTimer));
+
+
+        layout.getChildren().add(timerRectangle);
+        layout.getChildren().add(myTimer);
+        layout.getChildren().add(opponentTimer);
+    }
+
     private void drawChatTitle(Pane layout) {
         Rectangle chatTitleRectangle = new Rectangle();
         chatTitleRectangle.setWidth(chatPanelWidth);
         chatTitleRectangle.setHeight(chatTitleHeight);
         chatTitleRectangle.setX(chessTableLength);
-        chatTitleRectangle.setY(0);
+        chatTitleRectangle.setY(timerHeight);
         chatTitleRectangle.setFill(Color.TRANSPARENT);
         chatTitleRectangle.setStroke(Color.RED);
 
@@ -147,7 +111,7 @@ public class Chat {
         Text chatTitle = new Text("Your chat with " + opponentName);
         chatTitle.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20));
         chatTitle.setX(chatTitleRectangle.getX() + (chatPanelWidth / 2 - Utilities.getTextWidth(chatTitle) / 2));
-        chatTitle.setY(chatTitleHeight / 2 + Utilities.getTextHeight(chatTitle) / 2);
+        chatTitle.setY(chatTitleHeight / 2 + Utilities.getTextHeight(chatTitle) / 2 + timerHeight);
 
 
         layout.getChildren().add(chatTitleRectangle);
@@ -156,8 +120,9 @@ public class Chat {
 
     public void addMessage(String message, boolean sentByMe, boolean sentByPlayer, Pane pane) {
         int verticalSpaceBetweenMessages = 30;
-        int xOffSetMyMessage = 50;
+        int xOffSetMyMessage = 20;//50
         int xOffSetOpponentMessage = 30;
+        int xOffSet = 30;
         Font font;
         if (sentByPlayer) {
             font = Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20);
@@ -165,6 +130,8 @@ public class Chat {
         else {
             font = Font.font("Verdana", FontWeight.NORMAL, FontPosture.ITALIC, chatPanelWidth / 20);
         }
+        System.out.println(pane.getWidth());
+        System.out.println(pane.getPrefWidth());
 
 
         Text textMessage = new Text(message);
@@ -196,12 +163,23 @@ public class Chat {
         messageBackground.setWidth(Utilities.getTextWidth(messageBuilder) + 30);
         messageBackground.setHeight(Utilities.getTextHeight(messageBuilder) + 30);
 
-        if (!sentByMe) {
-            messageBackground.setX(xOffSetOpponentMessage);
-            messageBackground.setFill(Color.AQUAMARINE);
-        } else {
-            messageBackground.setX(xOffSetMyMessage + (widthLimit - Utilities.getTextWidth(messageBuilder)));
-            messageBackground.setFill(Color.YELLOW);
+        if (sentByPlayer) {
+
+            if(!sentByMe){
+//                messageBackground.setX(xOffSetOpponentMessage + (widthLimit - Utilities.getTextWidth(messageBuilder)));
+                messageBackground.setX(xOffSetMyMessage);
+                messageBackground.setFill(Color.AQUAMARINE);
+            }
+            else{
+                messageBackground.setX(chatPanelWidth - messageBackground.getWidth() - xOffSetMyMessage);
+                //messageBackground.setX(xOffSetMyMessage);
+                messageBackground.setFill(Color.YELLOW);
+            }
+        }
+         else{
+            messageBackground.setX(xOffSetMyMessage);
+            messageBackground.setFill(Color.BLUE);
+            messageBuilder.setFill(Color.WHITE);
         }
         messageBackground.setY(lastMessageY + verticalSpaceBetweenMessages);
         lastMessageY = (int) (messageBackground.getY() + messageBackground.getHeight());
@@ -231,9 +209,6 @@ public class Chat {
     }
 
 
-    private void drawScrollPane() {
-
-    }
 
     private void drawMessageSender(Pane layout) {
         Rectangle sendMessageRectangle = new Rectangle();

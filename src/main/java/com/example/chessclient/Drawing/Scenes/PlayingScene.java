@@ -8,7 +8,6 @@ import com.example.chessclient.Drawing.Enums.TableOrientation;
 import com.example.chessclient.Piece;
 import com.example.chessclient.Threads.BoardListener;
 import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -16,18 +15,19 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayingScene implements Drawable {
 
     Color blackTileColor = Color.CORAL;
     Color whiteTileColor = Color.BEIGE;
     int tileLength;
-    Map<ImageView, Piece> piecesMap = new HashMap<>();
+    List<Piece> pieces = new ArrayList<>();
     TableOrientation pov;
     Scene scene;
     Client client;
+    Pane layout;
     int chatWidth;
     String opponentName = "opponent";
 
@@ -44,26 +44,33 @@ public class PlayingScene implements Drawable {
         this.tileLength = tileLength;
         this.pov = pov;
         this.chatWidth = tileLength * 4;
-
-        Pane layout = new Pane();
-        drawBoard(layout, pov);
-        Chat chat = new Chat(tileLength,client);
-        chat.drawChat(layout);
-        placePieces(layout, pov);
+        this.layout = new Pane();
+        
+        drawBoard(pov);
+        Chat chat = new Chat(tileLength,client,layout);
+        chat.drawChat();
+        placePieces(pov);
         scene = new Scene(layout, 8 * tileLength + chatWidth, 8 * tileLength);
         new Thread(new BoardListener(client,chat,this)).start();
     }
 
 
     public Piece getPieceAtTile(String tile){
-        for(Piece piece : piecesMap.values()){
+        for(Piece piece : pieces){
             if(piece.getTile().equals(tile))
                 return piece;
         }
         return null;
     }
 
-    public void drawBoard(Pane layout, TableOrientation tableOrientation) {
+    public void removePiece(Piece piece){
+        if(piece!=null){
+            layout.getChildren().remove(piece.getImageView());
+            pieces.remove(piece);
+        }
+    }
+
+    public void drawBoard(TableOrientation tableOrientation) {
         //drawing chessboard's tiles
         for (int rowIndex = 0; rowIndex < 8; rowIndex++) {
             for (int columnIndex = 0; columnIndex < 8; columnIndex++) {
@@ -121,53 +128,53 @@ public class PlayingScene implements Drawable {
         }
     }
 
-    public void placePieces(Pane layout, TableOrientation tableOrientation) {
+    public void placePieces(TableOrientation tableOrientation) {
         for (int columnIndex = 0; columnIndex < 8; columnIndex++) {
             switch (columnIndex) {
                 case 0: //rook
                 case 7:
-                    Piece whiteRook = new Piece(ChessPiece.ROOK, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client);
-                    Piece blackRook = new Piece(ChessPiece.ROOK, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client);
-                    piecesMap.put(whiteRook.getImageView(), whiteRook);
-                    piecesMap.put(blackRook.getImageView(), blackRook);
+                    Piece whiteRook = new Piece(ChessPiece.ROOK, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client, this);
+                    Piece blackRook = new Piece(ChessPiece.ROOK, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client, this);
+                    pieces.add(whiteRook);
+                    pieces.add(blackRook);
                     break;
 
                 case 1: //knight
                 case 6:
-                    Piece whiteKnight = new Piece(ChessPiece.KNIGHT, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client);
-                    Piece blackKnight = new Piece(ChessPiece.KNIGHT, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client);
-                    piecesMap.put(whiteKnight.getImageView(), whiteKnight);
-                    piecesMap.put(blackKnight.getImageView(), blackKnight);
+                    Piece whiteKnight = new Piece(ChessPiece.KNIGHT, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client, this);
+                    Piece blackKnight = new Piece(ChessPiece.KNIGHT, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client, this);
+                    pieces.add(whiteKnight);
+                    pieces.add(blackKnight);
                     break;
 
                 case 2: //bishop
                 case 5:
-                    Piece whiteBishop = new Piece(ChessPiece.BISHOP, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client);
-                    Piece blackBishop = new Piece(ChessPiece.BISHOP, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client);
-                    piecesMap.put(whiteBishop.getImageView(), whiteBishop);
-                    piecesMap.put(blackBishop.getImageView(), blackBishop);
+                    Piece whiteBishop = new Piece(ChessPiece.BISHOP, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client, this);
+                    Piece blackBishop = new Piece(ChessPiece.BISHOP, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client, this);
+                    pieces.add(whiteBishop);
+                    pieces.add(blackBishop);
 
                     break;
 
                 case 3: //to check orientation of table
-                    Piece whiteQueen = new Piece(ChessPiece.QUEEN, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client);
-                    Piece blackQueen = new Piece(ChessPiece.QUEEN, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client);
-                    piecesMap.put(whiteQueen.getImageView(), whiteQueen);
-                    piecesMap.put(blackQueen.getImageView(), blackQueen);
+                    Piece whiteQueen = new Piece(ChessPiece.QUEEN, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client, this);
+                    Piece blackQueen = new Piece(ChessPiece.QUEEN, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client, this);
+                    pieces.add(whiteQueen);
+                    pieces.add(blackQueen);
                     break;
                 case 4:
-                    Piece whiteKing = new Piece(ChessPiece.KING, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client);
-                    Piece blackKing = new Piece(ChessPiece.KING, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client);
-                    piecesMap.put(whiteKing.getImageView(), whiteKing);
-                    piecesMap.put(blackKing.getImageView(), blackKing);
+                    Piece whiteKing = new Piece(ChessPiece.KING, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "1", tableOrientation, client, this);
+                    Piece blackKing = new Piece(ChessPiece.KING, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "8", tableOrientation, client, this);
+                    pieces.add(whiteKing);
+                    pieces.add(blackKing);
                     break;
             }
 
-            Piece whitePawn = new Piece(ChessPiece.PAWN, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "2", tableOrientation, client);
-            Piece blackPawn = new Piece(ChessPiece.PAWN, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "7", tableOrientation, client);
+            Piece whitePawn = new Piece(ChessPiece.PAWN, ChessColor.WHITE, tileLength, layout, (char) ((int) 'A' + columnIndex) + "2", tableOrientation, client, this);
+            Piece blackPawn = new Piece(ChessPiece.PAWN, ChessColor.BLACK, tileLength, layout, (char) ((int) 'A' + columnIndex) + "7", tableOrientation, client, this);
 
-            piecesMap.put(whitePawn.getImageView(), whitePawn);
-            piecesMap.put(blackPawn.getImageView(), blackPawn);
+            pieces.add(whitePawn);
+            pieces.add(blackPawn);
         }
     }
 

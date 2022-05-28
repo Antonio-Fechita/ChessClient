@@ -3,6 +3,7 @@ package com.example.chessclient;
 import com.example.chessclient.Drawing.Enums.ChessColor;
 import com.example.chessclient.Drawing.Enums.ChessPiece;
 import com.example.chessclient.Drawing.Enums.TableOrientation;
+import com.example.chessclient.Drawing.Scenes.PlayingScene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -13,13 +14,25 @@ public class Piece {
     private ImageView imageView;
     private String tile;
 
+    private PlayingScene playingScene;
+
     public String getTile() {
         return tile;
     }
 
-    public Piece(ChessPiece piece, ChessColor color, int tileLength, Pane layout, String initialTile, TableOrientation tableOrientation, Client client) {
+    public ChessPiece getPiece() {
+        return piece;
+    }
+
+    public ChessColor getColor() {
+        return color;
+    }
+
+    public Piece(ChessPiece piece, ChessColor color, int tileLength, Pane layout, String initialTile, TableOrientation
+            tableOrientation, Client client, PlayingScene playingScene) {
         this.piece = piece;
         this.color = color;
+        this.playingScene = playingScene;
         imageView = getPieceImageView(color, piece, tileLength);
         applyMouseEventsToPieceImage(imageView, tileLength, tableOrientation,client);
         layout.getChildren().add(imageView);
@@ -34,17 +47,18 @@ public class Piece {
 
     public void applyMouseEventsToPieceImage(ImageView imageView, int tileLength, TableOrientation tableOrientation, Client client) {
         imageView.setOnMouseDragged(mouseEvent -> {
+            imageView.toFront();
             imageView.setX(mouseEvent.getX() - tileLength / 2);
             imageView.setY(mouseEvent.getY() - tileLength / 2);
         });
 
         imageView.setOnMouseReleased(mouseEvent ->
         {
-            System.out.println("Moving " + color.toString().toLowerCase() + " " + piece.toString().toLowerCase() + " from " + tile + " to "
-                    + getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength));
+            String destinationTile = getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength);
+            System.out.println("Moving " + color.toString().toLowerCase() + " " + piece.toString().toLowerCase() +
+                    " from " + tile + " to " + destinationTile);
 
-            client.setLatestCommand("move " + tile + "-" + getTileFromCoordinates((int)
-                                    mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength));
+            client.setLatestCommand("move " + tile + "-" + destinationTile);
 
             String response;
             do{
@@ -52,6 +66,8 @@ public class Piece {
             }while (!response.startsWith("PLEASE") && !response.startsWith("INVALID MOVE") && !response.startsWith("MOVE"));
 
             if (response.equals("MOVE WAS APPLIED!")) { //if move is allowed by server
+                Piece pieceToBeRemoved = playingScene.getPieceAtTile(destinationTile);
+                playingScene.removePiece(pieceToBeRemoved);
                 placePieceAtTile(getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength), tableOrientation, tileLength);
             } else {
                 //System.out.println("WRONG RESPONSE: " + response);
