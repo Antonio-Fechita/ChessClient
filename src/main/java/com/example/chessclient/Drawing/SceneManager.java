@@ -34,7 +34,7 @@ public class SceneManager extends Application {
     public void stop(){
 
         System.out.println("M-am oprit bro");
-        client.setLastCommand("exit");
+        client.setLatestCommand("exit");
     }
 
     public Client getClient() {

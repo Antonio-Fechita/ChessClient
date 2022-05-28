@@ -126,11 +126,11 @@ public class LoginScene implements Drawable {
     private void onLoginButtonPress() throws IOException {
         String username = usernameTextField.getText();
         String password = passwordTextField.getText();
-        client.setFirstCommand("login " + username + " " + password);
+        client.setLatestCommand("login " + username + " " + password);
 
         String response;
         do{
-            response = client.getLatestResponse(false);
+            response = client.getLatestResponse();
         }while (!response.startsWith("Wrong") && !response.startsWith("#@Tkn%"));
 
 

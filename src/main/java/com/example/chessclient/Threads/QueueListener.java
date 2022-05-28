@@ -20,23 +20,25 @@ public class QueueListener implements Runnable {
 
     @Override
     public void run() {
-        client.setFirstCommand("queue");
+        client.setLatestCommand("queue");
         String response;
         do{
-            response = client.getLatestResponse(false);
+            response = client.getLatestResponse();
         }while (!response.startsWith("WAITING") && !response.startsWith("GAME"));
+
+
         System.out.println("[" + response + "]");
         if(response.equals("WAITING FOR OPPONENT..")) { //white player
             sceneManager.setPov(TableOrientation.WHITE_PLAYING);
             while(!response.equals("GAME IS ABOUT TO BEGIN!")) {
 
-                client.setFirstCommand("idle");
+//                client.setLatestCommand("idle");
 //                do{
-                    response = client.getLatestResponse(false);
+                    response = client.getLatestResponse();
 //                }while (!response.startsWith("GAME"));
 
 //                response = client.getLatestResponse(false);
-                System.out.println("RSP: [" + response + "]");
+//                System.out.println("RSP: [" + response + "]");
             }
         }
         else{

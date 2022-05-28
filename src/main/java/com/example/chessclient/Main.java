@@ -19,7 +19,7 @@ public class Main
 
             String line = scanner.nextLine();
 
-            client.setLastCommand( line );
+            client.setLatestCommand( line );
         }
     }
 }

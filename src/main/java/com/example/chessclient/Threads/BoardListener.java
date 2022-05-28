@@ -25,6 +25,8 @@ public class BoardListener implements Runnable {
 
     boolean isStopped;
 
+    private final static double SECONDS_PER_FRAME = 1 / 60.0;
+
     public BoardListener(Client client, Chat chat, PlayingScene playingScene) {
         this.client = client;
         this.chat = chat;
@@ -40,11 +42,28 @@ public class BoardListener implements Runnable {
         String nameFirstPlayer;
         String nameSecondPlayer;
 
+        long prevFrameNano = System.nanoTime();
 
         while (!isStopped) {
-            client.setLastCommand("boardStatus");
 
-            String response = client.getLatestResponse(true);
+            if ((System.nanoTime() - prevFrameNano) / 1000000000.0 > SECONDS_PER_FRAME) {
+                client.setLatestCommand("boardStatus");
+                prevFrameNano = System.nanoTime();
+
+            }
+
+
+            String response = client.getLatestResponse();
+
+            if (!response.startsWith("%"))
+                continue;
+
+
+//            try {
+//                TimeUnit.SECONDS.sleep(3);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
 
             String[] breakdown = response.split("%");
 
