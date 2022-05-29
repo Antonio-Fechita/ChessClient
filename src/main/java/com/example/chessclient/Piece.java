@@ -35,7 +35,8 @@ public class Piece {
         this.playingScene = playingScene;
         imageView = getPieceImageView(color, piece, tileLength);
 
-        applyMouseEventsToPieceImage(imageView, tileLength, tableOrientation, client);
+        if(playingScene!=null)
+            applyMouseEventsToPieceImage(imageView, tileLength, tableOrientation, client);
         layout.getChildren().add(imageView);
         tile = initialTile;
         placePieceAtTile(tile, tableOrientation, tileLength);

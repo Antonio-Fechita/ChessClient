@@ -2,6 +2,7 @@ package com.example.chessclient.Drawing.Scenes;
 
 import com.example.chessclient.Client;
 import com.example.chessclient.Drawable;
+import com.example.chessclient.Drawing.Enums.AvailableScene;
 import com.example.chessclient.Drawing.SceneManager;
 import com.example.chessclient.Threads.QueueListener;
 import com.example.chessclient.Utils.Utilities;
@@ -85,6 +86,14 @@ public class MainMenu implements Drawable {
                 throw new RuntimeException(e);
             }
         });
+
+        replaysButton.setOnAction(actionEvent -> {
+            try {
+                onReplaysButton();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
         quitButton.setOnAction(actionEvent -> Platform.exit());
 
         this.sceneManager = sceneManager;
@@ -103,6 +112,10 @@ public class MainMenu implements Drawable {
 
     private void onInviteButtonPress() throws IOException {
         //sceneManager.swapScene(AvailableScene.REGISTER_SCENE);
+    }
+
+    private void onReplaysButton() throws IOException {
+        sceneManager.swapScene(AvailableScene.HISTORY_SCENE);
     }
 
     @Override

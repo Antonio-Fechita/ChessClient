@@ -25,6 +25,7 @@ public class BoardListener implements Runnable {
     PlayingScene playingScene;
 
     boolean isStopped;
+    boolean isBoardStatusRequired = true;
 
     private final static double SECONDS_PER_FRAME = 1 / 30.0;
 
@@ -38,6 +39,10 @@ public class BoardListener implements Runnable {
         isStopped = stopped;
     }
 
+    public void setBoardStatusRequired(boolean boardStatusRequired) {
+        isBoardStatusRequired = boardStatusRequired;
+    }
+
     @Override
     public void run() {
         String nameFirstPlayer;
@@ -47,7 +52,7 @@ public class BoardListener implements Runnable {
 
         while (!isStopped) {
 
-            if ((System.nanoTime() - prevFrameNano) / 1000000000.0 > SECONDS_PER_FRAME) {
+            if ((System.nanoTime() - prevFrameNano) / 1000000000.0 > SECONDS_PER_FRAME && isBoardStatusRequired) {
                 client.setLatestCommand("boardStatus");
                 prevFrameNano = System.nanoTime();
 
@@ -58,11 +63,17 @@ public class BoardListener implements Runnable {
 
             if (!response.startsWith("%")) {
                 if (!response.equals("--idle--") && !response.equals("MOVE WAS APPLIED!") &&
-                        !response.equals("MESSAGE SENT!") && !response.equals("Make a move!")) {
+                        !response.equals("MESSAGE SENT!") && !response.equals("Make a move!")
+                        && !response.equals("Wrong command")) {
                     int numberOfMessagesReceived = client.getNumberOfMessagesReceived();
                     if (numberOfMessagesReceived != numberOfServerMessages) {
                         Platform.runLater(() -> chat.addMessage(response, false, false, chat.getContentsOfScrollPane()));
                         numberOfServerMessages = numberOfMessagesReceived;
+                    }
+                    if (response.startsWith("The winner is")) {
+                        System.out.println("received winner info");
+                        isStopped = true;
+                        break;
                     }
                 }
                 continue;
@@ -96,8 +107,6 @@ public class BoardListener implements Runnable {
 
                 if (numberOfMessages != lastNumberOfMessages) {
 
-                    System.out.println("fix messages");
-
                     int numberOfMessagesToAdd = numberOfMessages - lastNumberOfMessages;
                     for (int i = numberOfMessagesToAdd; i > 0; i--) {
                         String message = messages.get(messages.size() - i);
@@ -114,8 +123,6 @@ public class BoardListener implements Runnable {
                 if ((numberOfMoves % 2 == 0 && playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)) ||
                         ((numberOfMoves % 2 == 1) && playingScene.getPov().equals(TableOrientation.BLACK_PLAYING)) &&
                                 numberOfMoves > lastKnownNumberOfMoves) {
-
-                    System.out.println("fix moves");
 
                     Piece piece = playingScene.getPieceAtTile(lastMove.substring(0, 2));
                     if (piece != null) { //should always be true

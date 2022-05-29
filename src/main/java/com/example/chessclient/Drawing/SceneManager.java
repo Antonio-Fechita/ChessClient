@@ -28,6 +28,7 @@ public class SceneManager extends Application {
         stage.show();
         client.start();
 
+
     }
 
     @Override
@@ -49,6 +50,8 @@ public class SceneManager extends Application {
             case LOGIN_SCENE -> stage.setScene(new LoginScene(this).getScene());
             case REGISTER_SCENE -> stage.setScene(new RegisterScene(this).getScene());
             case MAIN_MENU_SCENE -> stage.setScene(new MainMenu(this).getScene());
+            case HISTORY_SCENE -> stage.setScene(new HistoryScene(client,this).getScene());
+            case REPLAY_SCENE -> stage.setScene(new ReplayScene(100,this).getScene());
         }
     }
 

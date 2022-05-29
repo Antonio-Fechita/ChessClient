@@ -55,7 +55,8 @@ public class Client extends Thread
                     break;
 
                 builder.append(command);
-//                System.out.println("Sent command: " + builder);
+                if(!builder.toString().endsWith("idle"))
+                    System.out.println("Sent command: " + builder);
                 out.println(builder);
                 latestResponse = in.readLine();
 
@@ -66,8 +67,8 @@ public class Client extends Thread
                 if (lookForToken[0].equals("#@Tkn") && lookForToken.length == 2)
                     AuthenticationToken.setAuthenticationToken(lookForToken[1]);
 
-//                if ( !latestResponse.equals("--idle--") )
-//                    System.out.println(latestResponse);
+                if ( !latestResponse.equals("--idle--") )
+                    System.out.println(latestResponse);
             } while (true);
         } catch (Exception e) {
             System.err.println("No server listening... " + e);

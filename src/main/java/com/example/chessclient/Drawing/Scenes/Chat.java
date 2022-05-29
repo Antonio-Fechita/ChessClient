@@ -1,8 +1,10 @@
 package com.example.chessclient.Drawing.Scenes;
 
 import com.example.chessclient.Client;
+import com.example.chessclient.Drawing.Enums.AvailableScene;
 import com.example.chessclient.Drawing.SceneManager;
 import com.example.chessclient.Utils.Utilities;
+import javafx.animation.PauseTransition;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -13,6 +15,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import java.io.IOException;
 
@@ -35,13 +38,14 @@ public class Chat {
 
     Client client;
     SceneManager sceneManager;
+    PlayingScene playingScene;
 
 
     public Pane getContentsOfScrollPane() {
         return contentsOfScrollPane;
     }
 
-    public Chat(int tileLength, Client client, Pane layout, SceneManager sceneManager) {
+    public Chat(int tileLength, Client client, Pane layout, SceneManager sceneManager, PlayingScene playingScene) {
         this.chatPanelWidth = 4 * tileLength;
         this.chatTitleHeight = (int) (tileLength / 2.5);
         this.chessTableLength = 8 * tileLength;
@@ -50,6 +54,7 @@ public class Chat {
         this.client = client;
         this.layout = layout;
         this.sceneManager = sceneManager;
+        this.playingScene = playingScene;
         contentsOfScrollPane = new Pane();
         lastMessageY = 0;
     }
@@ -285,6 +290,7 @@ public class Chat {
     }
 
     private void onForfeitButtonPress() throws IOException {
+        playingScene.stopBoardStatusRequests();
         Text loserText = new Text("LOSER");
         loserText.setFont(Font.loadFont("file:src\\main\\resources\\fonts\\gunplay 3d.ttf",chessTableLength/5));
         loserText.setFill(Color.RED);
@@ -292,9 +298,20 @@ public class Chat {
         loserText.setX(chessTableLength/2 - Utilities.getTextWidth(loserText)/2);
         loserText.setY(chessTableLength/2);
         loserText.setViewOrder(-4);
-
         layout.getChildren().add(loserText);
-        //sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+        client.setLatestCommand("forfeit");
+
+
+        PauseTransition transition = new PauseTransition(Duration.seconds(5));
+        transition.play();
+        transition.setOnFinished(e -> {
+            try {
+                sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+
     }
 
     private void onMessageAreaClick(){

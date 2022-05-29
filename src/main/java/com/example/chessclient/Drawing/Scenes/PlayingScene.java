@@ -32,6 +32,7 @@ public class PlayingScene implements Drawable {
     int chatWidth;
     String opponentName = "opponent";
     SceneManager sceneManager;
+    BoardListener boardListener;
 
     public TableOrientation getPov() {
         return pov;
@@ -48,15 +49,21 @@ public class PlayingScene implements Drawable {
         this.chatWidth = tileLength * 4;
         this.layout = new Pane();
         this.sceneManager = sceneManager;
-        
+
+
         drawBoard(pov);
-        Chat chat = new Chat(tileLength,client,layout,sceneManager);
+        Chat chat = new Chat(tileLength,client,layout,sceneManager,this);
+        this.boardListener = new BoardListener(client,chat,this);
         chat.drawChat();
         placePieces(pov);
         scene = new Scene(layout, 8 * tileLength + chatWidth, 8 * tileLength);
-        new Thread(new BoardListener(client,chat,this)).start();
+        new Thread(boardListener).start();
     }
 
+
+    public void stopBoardStatusRequests(){
+        boardListener.setBoardStatusRequired(false);
+    }
 
     public Piece getPieceAtTile(String tile){
         for(Piece piece : pieces){
