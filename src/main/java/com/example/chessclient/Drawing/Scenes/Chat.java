@@ -1,6 +1,7 @@
 package com.example.chessclient.Drawing.Scenes;
 
 import com.example.chessclient.Client;
+import com.example.chessclient.Drawing.SceneManager;
 import com.example.chessclient.Utils.Utilities;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -12,6 +13,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+
+import java.io.IOException;
 
 public class Chat {
 
@@ -31,13 +34,14 @@ public class Chat {
     TextArea messageArea;
 
     Client client;
+    SceneManager sceneManager;
 
 
     public Pane getContentsOfScrollPane() {
         return contentsOfScrollPane;
     }
 
-    public Chat(int tileLength, Client client, Pane layout) {
+    public Chat(int tileLength, Client client, Pane layout, SceneManager sceneManager) {
         this.chatPanelWidth = 4 * tileLength;
         this.chatTitleHeight = (int) (tileLength / 2.5);
         this.chessTableLength = 8 * tileLength;
@@ -45,6 +49,7 @@ public class Chat {
         this.timerHeight = (int) (tileLength * 0.7);
         this.client = client;
         this.layout = layout;
+        this.sceneManager = sceneManager;
         contentsOfScrollPane = new Pane();
         lastMessageY = 0;
     }
@@ -58,6 +63,7 @@ public class Chat {
         scrollPane.setLayoutX(chessTableLength);
         scrollPane.setLayoutY(chatTitleHeight + timerHeight);
         scrollPane.setMaxSize(chatPanelWidth, chessTableLength - (chatTitleHeight + sendMessageRectangleHeight + timerHeight));
+        scrollPane.setViewOrder(-2);
 
 
         scrollPane.setContent(contentsOfScrollPane);
@@ -82,15 +88,18 @@ public class Chat {
         timerRectangle.setY(0);
         timerRectangle.setWidth(chatPanelWidth);
         timerRectangle.setHeight(timerHeight);
-        timerRectangle.setFill(Color.TRANSPARENT);
+        timerRectangle.setFill(Color.ANTIQUEWHITE);
+        timerRectangle.setViewOrder(-2);
         myTimer = new Text("My timer: ");
         myTimer.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 25));
         myTimer.setX(chessTableLength + chatPanelWidth/20);
         myTimer.setY(timerHeight/2);
+        myTimer.setViewOrder(-3);
         opponentTimer = new Text("Opponent timer: ");
         opponentTimer.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 25));
         opponentTimer.setX(myTimer.getX());
         opponentTimer.setY(myTimer.getY() + Utilities.getTextHeight(opponentTimer));
+        opponentTimer.setViewOrder(myTimer.getViewOrder());
 
 
         layout.getChildren().add(timerRectangle);
@@ -104,14 +113,16 @@ public class Chat {
         chatTitleRectangle.setHeight(chatTitleHeight);
         chatTitleRectangle.setX(chessTableLength);
         chatTitleRectangle.setY(timerHeight);
-        chatTitleRectangle.setFill(Color.TRANSPARENT);
         chatTitleRectangle.setStroke(Color.RED);
+        chatTitleRectangle.setFill(Color.ANTIQUEWHITE);
+        chatTitleRectangle.setViewOrder(-2);
 
 
         Text chatTitle = new Text("Your chat with " + opponentName);
         chatTitle.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20));
         chatTitle.setX(chatTitleRectangle.getX() + (chatPanelWidth / 2 - Utilities.getTextWidth(chatTitle) / 2));
         chatTitle.setY(chatTitleHeight / 2 + Utilities.getTextHeight(chatTitle) / 2 + timerHeight);
+        chatTitle.setViewOrder(-3);
 
 
         layout.getChildren().add(chatTitleRectangle);
@@ -134,7 +145,6 @@ public class Chat {
         System.out.println(pane.getPrefWidth());
 
 
-        Text textMessage = new Text(message);
         Text messageBuilder = new Text();
         Text textToBeChecked = new Text();
         textToBeChecked.setFont(font);
@@ -156,12 +166,14 @@ public class Chat {
         }
 
         messageBuilder.setFont(font);
+        messageBuilder.setViewOrder(-4);
 
         Rectangle messageBackground = new Rectangle();
         messageBackground.setArcHeight(40);
         messageBackground.setArcWidth(40);
         messageBackground.setWidth(Utilities.getTextWidth(messageBuilder) + 30);
         messageBackground.setHeight(Utilities.getTextHeight(messageBuilder) + 30);
+        messageBackground.setViewOrder(-3);
 
         if (sentByPlayer) {
 
@@ -216,8 +228,9 @@ public class Chat {
         sendMessageRectangle.setHeight(sendMessageRectangleHeight);
         sendMessageRectangle.setX(chessTableLength);
         sendMessageRectangle.setY(chessTableLength - sendMessageRectangleHeight);
-        sendMessageRectangle.setFill(Color.TRANSPARENT);
         sendMessageRectangle.setStroke(Color.RED);
+        sendMessageRectangle.setFill(Color.ANTIQUEWHITE);
+        sendMessageRectangle.setViewOrder(-2);
 
         messageArea = new TextArea();
         int messageAreaHeight = (int) (sendMessageRectangleHeight * 0.6);
@@ -231,6 +244,8 @@ public class Chat {
 
         messageArea.setOnMouseClicked(mouseEvent -> onMessageAreaClick());
 
+        messageArea.setViewOrder(-3);
+
         Button sendMessageButton = new Button("Send");
         Button forfeitButton = new Button("Forfeit");
 
@@ -239,7 +254,14 @@ public class Chat {
         forfeitButton.setPrefWidth(messageAreaWidth / 2 - messageAreaWidth / 15);
         forfeitButton.setPrefHeight(messageAreaHeight / 2 - messageAreaHeight / 12);
         forfeitButton.setFont(Font.font("Verdana", FontWeight.NORMAL, forfeitButton.getPrefWidth() / 8));
-        forfeitButton.setOnMouseClicked(mouseEvent -> onForfeitButtonPress());
+        forfeitButton.setOnMouseClicked(mouseEvent -> {
+            try {
+                onForfeitButtonPress();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        forfeitButton.setViewOrder(-3);
 
         sendMessageButton.setLayoutX(messageArea.getLayoutX() + messageAreaWidth / 2 + messageAreaWidth / 20);
         sendMessageButton.setLayoutY(forfeitButton.getLayoutY());
@@ -247,6 +269,7 @@ public class Chat {
         sendMessageButton.setPrefHeight(forfeitButton.getPrefHeight());
         sendMessageButton.setFont(forfeitButton.getFont());
         sendMessageButton.setOnMouseClicked(mouseEvent -> onSendButtonPress());
+        sendMessageButton.setViewOrder(-3);
 
 
         layout.getChildren().add(sendMessageRectangle);
@@ -257,12 +280,21 @@ public class Chat {
 
     private void onSendButtonPress() {
         String message = messageArea.getText();
-        //addMessage(message, true, true,contentsOfScrollPane);
         messageArea.setText("");
         client.setLatestCommand("gameMessage " + message);
     }
 
-    private void onForfeitButtonPress(){
+    private void onForfeitButtonPress() throws IOException {
+        Text loserText = new Text("LOSER");
+        loserText.setFont(Font.loadFont("file:src\\main\\resources\\fonts\\gunplay 3d.ttf",chessTableLength/5));
+        loserText.setFill(Color.RED);
+        loserText.toFront();
+        loserText.setX(chessTableLength/2 - Utilities.getTextWidth(loserText)/2);
+        loserText.setY(chessTableLength/2);
+        loserText.setViewOrder(-4);
+
+        layout.getChildren().add(loserText);
+        //sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
     }
 
     private void onMessageAreaClick(){

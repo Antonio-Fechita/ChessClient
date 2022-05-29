@@ -44,7 +44,7 @@ public class SceneManager extends Application {
 
     public void swapScene(AvailableScene scene) throws IOException {
         switch (scene) {
-            case PLAYING_SCENE -> stage.setScene(new PlayingScene(client, 120, pov).getScene());
+            case PLAYING_SCENE -> stage.setScene(new PlayingScene(client, 120, pov,this).getScene());
             case INITIAL_SCENE -> stage.setScene(new InitialScene(this).getScene());
             case LOGIN_SCENE -> stage.setScene(new LoginScene(this).getScene());
             case REGISTER_SCENE -> stage.setScene(new RegisterScene(this).getScene());

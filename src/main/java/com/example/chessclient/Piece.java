@@ -34,7 +34,8 @@ public class Piece {
         this.color = color;
         this.playingScene = playingScene;
         imageView = getPieceImageView(color, piece, tileLength);
-        applyMouseEventsToPieceImage(imageView, tileLength, tableOrientation,client);
+
+        applyMouseEventsToPieceImage(imageView, tileLength, tableOrientation, client);
         layout.getChildren().add(imageView);
         tile = initialTile;
         placePieceAtTile(tile, tableOrientation, tileLength);
@@ -47,32 +48,41 @@ public class Piece {
 
     public void applyMouseEventsToPieceImage(ImageView imageView, int tileLength, TableOrientation tableOrientation, Client client) {
         imageView.setOnMouseDragged(mouseEvent -> {
-            imageView.toFront();
+
+
+//            imageView.setViewOrder(-1);
+
             imageView.setX(mouseEvent.getX() - tileLength / 2);
             imageView.setY(mouseEvent.getY() - tileLength / 2);
         });
 
         imageView.setOnMouseReleased(mouseEvent ->
         {
-            String destinationTile = getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength);
-            System.out.println("Moving " + color.toString().toLowerCase() + " " + piece.toString().toLowerCase() +
-                    " from " + tile + " to " + destinationTile);
+            if (mouseEvent.getX() >= 0 && mouseEvent.getX() <= tileLength * 8 &&
+                    mouseEvent.getY() >= 0 && mouseEvent.getY() <= tileLength * 8) {
 
-            client.setLatestCommand("move " + tile + "-" + destinationTile);
+                String destinationTile = getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength);
+                System.out.println("Moving " + color.toString().toLowerCase() + " " + piece.toString().toLowerCase() +
+                        " from " + tile + " to " + destinationTile);
 
-            String response;
-            do{
-                response = client.getLatestResponse();
-            }while (!response.startsWith("PLEASE") && !response.startsWith("INVALID MOVE") && !response.startsWith("MOVE"));
+                client.setLatestCommand("move " + tile + "-" + destinationTile);
 
-            if (response.equals("MOVE WAS APPLIED!")) { //if move is allowed by server
-                Piece pieceToBeRemoved = playingScene.getPieceAtTile(destinationTile);
-                playingScene.removePiece(pieceToBeRemoved);
-                placePieceAtTile(getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength), tableOrientation, tileLength);
-            } else {
-                //System.out.println("WRONG RESPONSE: " + response);
-                placePieceAtTile(tile, tableOrientation, tileLength);
+                String response;
+                do {
+                    response = client.getLatestResponse();
+                } while (!response.startsWith("PLEASE") && !response.startsWith("INVALID MOVE") && !response.startsWith("MOVE"));
+
+                if (response.equals("MOVE WAS APPLIED!")) { //if move is allowed by server
+                    Piece pieceToBeRemoved = playingScene.getPieceAtTile(destinationTile);
+                    playingScene.removePiece(pieceToBeRemoved);
+                    placePieceAtTile(getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength), tableOrientation, tileLength);
+                } else {
+                    placePieceAtTile(tile, tableOrientation, tileLength);
+                }
             }
+            else
+                placePieceAtTile(tile, tableOrientation, tileLength);
+//            imageView.setViewOrder(0);
         });
     }
 

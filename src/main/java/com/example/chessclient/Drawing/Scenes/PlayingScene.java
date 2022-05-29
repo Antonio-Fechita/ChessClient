@@ -5,6 +5,7 @@ import com.example.chessclient.Drawable;
 import com.example.chessclient.Drawing.Enums.ChessColor;
 import com.example.chessclient.Drawing.Enums.ChessPiece;
 import com.example.chessclient.Drawing.Enums.TableOrientation;
+import com.example.chessclient.Drawing.SceneManager;
 import com.example.chessclient.Piece;
 import com.example.chessclient.Threads.BoardListener;
 import javafx.scene.Scene;
@@ -30,6 +31,7 @@ public class PlayingScene implements Drawable {
     Pane layout;
     int chatWidth;
     String opponentName = "opponent";
+    SceneManager sceneManager;
 
     public TableOrientation getPov() {
         return pov;
@@ -39,15 +41,16 @@ public class PlayingScene implements Drawable {
         return tileLength;
     }
 
-    public PlayingScene(Client client, int tileLength, TableOrientation pov) {
+    public PlayingScene(Client client, int tileLength, TableOrientation pov,SceneManager sceneManager) {
         this.client = client;
         this.tileLength = tileLength;
         this.pov = pov;
         this.chatWidth = tileLength * 4;
         this.layout = new Pane();
+        this.sceneManager = sceneManager;
         
         drawBoard(pov);
-        Chat chat = new Chat(tileLength,client,layout);
+        Chat chat = new Chat(tileLength,client,layout,sceneManager);
         chat.drawChat();
         placePieces(pov);
         scene = new Scene(layout, 8 * tileLength + chatWidth, 8 * tileLength);
