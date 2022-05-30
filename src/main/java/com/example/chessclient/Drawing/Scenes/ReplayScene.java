@@ -29,6 +29,7 @@ public class ReplayScene implements Drawable {
     Pane layout;
     Client client;
     List<Piece> pieces;
+    List<Piece> eatenPieces;
     SceneManager sceneManager;
     Scene scene;
     int currentMove;
@@ -41,6 +42,7 @@ public class ReplayScene implements Drawable {
         this.sceneManager = sceneManager;
         this.client = sceneManager.getClient();
         this.pieces = new ArrayList<>();
+        this.eatenPieces = new ArrayList<>();
         this.layout = new Pane();
         this.currentMove = 0;
 
@@ -101,6 +103,9 @@ public class ReplayScene implements Drawable {
             eatenPiece.getImageView().setVisible(false);
         }
 
+        if(currentMove == eatenPieces.size())
+            eatenPieces.add(eatenPiece);
+
         currentMove++;
         backwardButton.setDisable(false);
         if(currentMove == moves.length)
@@ -110,7 +115,7 @@ public class ReplayScene implements Drawable {
 
     private void onBackwardButtonPress(){
         Piece piece = getPieceAtTile(moves[currentMove-1].substring(3),true);
-        Piece eatenPiece = getPieceAtTile(moves[currentMove-1].substring(3),false);
+        Piece eatenPiece = eatenPieces.get(currentMove-1);
         piece.placePieceAtTile(moves[currentMove-1].substring(0,2),TableOrientation.WHITE_PLAYING,tileLength);
         if(eatenPiece!=null){
             eatenPiece.getImageView().setVisible(true);

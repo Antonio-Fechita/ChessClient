@@ -117,56 +117,6 @@ public class HistoryScene implements Drawable {
         System.out.println();
     }
 
-//    private void drawHeaders(Pane layout){
-//        Text whitePlayerText = new Text("White\n player");
-//        Text blackPlayerText = new Text("Black player");
-//        Text dateText = new Text("Date");
-//        Text hourText = new Text("Hour");
-//        Text durationText = new Text("Duration");
-//        Text winnerText = new Text("Winner");
-//        Text replayText = new Text("Replay");
-//
-//
-//        whitePlayerText.setFont(font);
-//        blackPlayerText.setFont(font);
-//        dateText.setFont(font);
-//        hourText.setFont(font);
-//        durationText.setFont(font);
-//        winnerText.setFont(font);
-//        replayText.setFont(font);
-//
-//        whitePlayerText.setFill(Color.WHITE);
-//        blackPlayerText.setFill(Color.WHITE);
-//        dateText.setFill(Color.WHITE);
-//        hourText.setFill(Color.WHITE);
-//        durationText.setFill(Color.WHITE);
-//        winnerText.setFill(Color.WHITE);
-//        replayText.setFill(Color.WHITE);
-//
-//        whitePlayerText.setX(100);
-//        whitePlayerText.setY(100);
-//
-////        whitePlayerText.setX(100);
-////        whitePlayerText.setY(100);
-////
-////        whitePlayerText.setX(100);
-////        whitePlayerText.setY(100);
-////
-////        whitePlayerText.setX(100);
-////        whitePlayerText.setY(100);
-////
-////        whitePlayerText.setX(100);
-////        whitePlayerText.setY(100);
-////
-////        whitePlayerText.setX(100);
-////        whitePlayerText.setY(100);
-////
-////        whitePlayerText.setX(100);
-////        whitePlayerText.setY(100);
-//        layout.getChildren().add(whitePlayerText);
-//
-//    }
-
 
     private void onButtonPress(String matchId) throws IOException {
         client.setLatestCommand("replay " + matchId);
