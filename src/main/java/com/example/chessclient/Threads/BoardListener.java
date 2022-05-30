@@ -24,7 +24,7 @@ public class BoardListener implements Runnable {
 
     PlayingScene playingScene;
 
-    boolean isStopped;
+    boolean isStopped = false;
     boolean isBoardStatusRequired = true;
 
     private final static double SECONDS_PER_FRAME = 1 / 30.0;
@@ -64,18 +64,26 @@ public class BoardListener implements Runnable {
             if (!response.startsWith("%")) {
                 if (!response.equals("--idle--") && !response.equals("MOVE WAS APPLIED!") &&
                         !response.equals("MESSAGE SENT!") && !response.equals("Make a move!")
-                        && !response.equals("Wrong command")) {
+                        && !response.equals("Wrong command") && !response.equals("!notingame!")) {
                     int numberOfMessagesReceived = client.getNumberOfMessagesReceived();
                     if (numberOfMessagesReceived != numberOfServerMessages) {
                         Platform.runLater(() -> chat.addMessage(response, false, false, chat.getContentsOfScrollPane()));
                         numberOfServerMessages = numberOfMessagesReceived;
                     }
-                    if (response.startsWith("The winner is")) {
-                        System.out.println("received winner info");
-                        isStopped = true;
-                        break;
-                    }
                 }
+
+
+                if (response.equals("!notingame!") && client.isInGame()) {
+                    System.out.println("GAME FINISHED");
+                    client.setInGame(false);
+                    if (client.isPressedForfeit())
+                        Platform.runLater(() -> chat.drawTransition(false));
+
+                    else
+                        Platform.runLater(() -> chat.drawTransition(true));
+                    client.setPressedForfeit(false);
+                }
+
                 continue;
             }
 
@@ -142,14 +150,13 @@ public class BoardListener implements Runnable {
                 }
 
 
-                if(playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)){
+                if (playingScene.getPov().equals(TableOrientation.WHITE_PLAYING)) {
                     Platform.runLater(() -> {
                         chat.setMyTimer(timeFirstPlayer);
                         chat.setOpponentTimer(timeSecondPlayer);
                     });
-                }
-                else{
-                    Platform.runLater(() ->{
+                } else {
+                    Platform.runLater(() -> {
                         chat.setMyTimer(timeSecondPlayer);
                         chat.setOpponentTimer(timeFirstPlayer);
                     });

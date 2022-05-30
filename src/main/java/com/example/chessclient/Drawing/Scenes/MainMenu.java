@@ -31,6 +31,7 @@ public class MainMenu implements Drawable {
     Button quitButton = new Button("Quit");
     Client client;
 
+
     boolean isInQueue = false;
 
 

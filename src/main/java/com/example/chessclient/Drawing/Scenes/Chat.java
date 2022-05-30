@@ -87,7 +87,7 @@ public class Chat {
         opponentTimer.setText("Opponent time: " + time);
     }
 
-    private void drawTimer(Pane layout){
+    private void drawTimer(Pane layout) {
         Rectangle timerRectangle = new Rectangle();
         timerRectangle.setX(chessTableLength);
         timerRectangle.setY(0);
@@ -97,8 +97,8 @@ public class Chat {
         timerRectangle.setViewOrder(-2);
         myTimer = new Text("My timer: ");
         myTimer.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 25));
-        myTimer.setX(chessTableLength + chatPanelWidth/20);
-        myTimer.setY(timerHeight/2);
+        myTimer.setX(chessTableLength + chatPanelWidth / 20);
+        myTimer.setY(timerHeight / 2);
         myTimer.setViewOrder(-3);
         opponentTimer = new Text("Opponent timer: ");
         opponentTimer.setFont(Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 25));
@@ -142,12 +142,11 @@ public class Chat {
         Font font;
         if (sentByPlayer) {
             font = Font.font("Verdana", FontWeight.BOLD, chatPanelWidth / 20);
-        }
-        else {
+        } else {
             font = Font.font("Verdana", FontWeight.NORMAL, FontPosture.ITALIC, chatPanelWidth / 20);
         }
-        System.out.println(pane.getWidth());
-        System.out.println(pane.getPrefWidth());
+//        System.out.println(pane.getWidth());
+//        System.out.println(pane.getPrefWidth());
 
 
         Text messageBuilder = new Text();
@@ -182,18 +181,16 @@ public class Chat {
 
         if (sentByPlayer) {
 
-            if(!sentByMe){
+            if (!sentByMe) {
 //                messageBackground.setX(xOffSetOpponentMessage + (widthLimit - Utilities.getTextWidth(messageBuilder)));
                 messageBackground.setX(xOffSetMyMessage);
                 messageBackground.setFill(Color.AQUAMARINE);
-            }
-            else{
+            } else {
                 messageBackground.setX(chatPanelWidth - messageBackground.getWidth() - xOffSetMyMessage);
                 //messageBackground.setX(xOffSetMyMessage);
                 messageBackground.setFill(Color.YELLOW);
             }
-        }
-         else{
+        } else {
             messageBackground.setX(xOffSetMyMessage);
             messageBackground.setFill(Color.BLUE);
             messageBuilder.setFill(Color.WHITE);
@@ -224,7 +221,6 @@ public class Chat {
 
         return wordBuilder.toString();
     }
-
 
 
     private void drawMessageSender(Pane layout) {
@@ -290,31 +286,43 @@ public class Chat {
     }
 
     private void onForfeitButtonPress() throws IOException {
-        playingScene.stopBoardStatusRequests();
-        Text loserText = new Text("LOSER");
-        loserText.setFont(Font.loadFont("file:src\\main\\resources\\fonts\\gunplay 3d.ttf",chessTableLength/5));
-        loserText.setFill(Color.RED);
-        loserText.toFront();
-        loserText.setX(chessTableLength/2 - Utilities.getTextWidth(loserText)/2);
-        loserText.setY(chessTableLength/2);
-        loserText.setViewOrder(-4);
-        layout.getChildren().add(loserText);
+        client.setPressedForfeit(true);
+//        playingScene.stopBoardStatusRequests();
         client.setLatestCommand("forfeit");
+    }
 
+    public void drawTransition(boolean isWinner) {
+        System.out.println("TRANSITION");
+        Text conclusionText;
+        if (isWinner) {
+            conclusionText = new Text("WINNER");
+            conclusionText.setFill(Color.BLUE);
+        } else {
+            conclusionText = new Text("LOSER");
+            conclusionText.setFill(Color.RED);
+        }
+        conclusionText.setFont(Font.loadFont("file:src\\main\\resources\\fonts\\gunplay 3d.ttf", chessTableLength / 5));
+        conclusionText.toFront();
+        conclusionText.setX(chessTableLength / 2 - Utilities.getTextWidth(conclusionText) / 2);
+        conclusionText.setY(chessTableLength / 2);
+        conclusionText.setViewOrder(-4);
+        layout.getChildren().add(conclusionText);
 
         PauseTransition transition = new PauseTransition(Duration.seconds(5));
+        System.out.println("before transition");
         transition.play();
         transition.setOnFinished(e -> {
             try {
+                System.out.println("after transition");
                 sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
             } catch (IOException exception) {
                 throw new RuntimeException(exception);
             }
         });
-
     }
 
-    private void onMessageAreaClick(){
+
+    private void onMessageAreaClick() {
         messageArea.requestFocus();
     }
 

@@ -22,32 +22,31 @@ public class QueueListener implements Runnable {
     public void run() {
         client.setLatestCommand("queue");
         String response;
-        do{
+        do {
             response = client.getLatestResponse();
-        }while (!response.startsWith("WAITING") && !response.startsWith("GAME"));
+        } while (!response.startsWith("WAITING") && !response.startsWith("GAME"));
 
 
         System.out.println("[" + response + "]");
-        if(response.equals("WAITING FOR OPPONENT..")) { //white player
+        if (response.equals("WAITING FOR OPPONENT..")) { //white player
             sceneManager.setPov(TableOrientation.WHITE_PLAYING);
-            while(!response.equals("GAME IS ABOUT TO BEGIN!")) {
+            do {
 
-//                client.setLatestCommand("idle");
-//                do{
-                    response = client.getLatestResponse();
-//                }while (!response.startsWith("GAME"));
+                client.setLatestCommand("boardStatus");
 
-//                response = client.getLatestResponse(false);
-//                System.out.println("RSP: [" + response + "]");
-            }
-        }
-        else{
+                response = client.getLatestResponse();
+
+                //System.out.println("response: [" + response + "]");
+
+            } while (!response.startsWith("%T%"));
+        } else {
             sceneManager.setPov(TableOrientation.BLACK_PLAYING);
         }
 
 //        System.out.println("SWAPPING SCENE");
         Platform.runLater(() -> {
             try {
+                client.setInGame(true);
                 sceneManager.swapScene(AvailableScene.PLAYING_SCENE);
             } catch (IOException e) {
                 throw new RuntimeException(e);

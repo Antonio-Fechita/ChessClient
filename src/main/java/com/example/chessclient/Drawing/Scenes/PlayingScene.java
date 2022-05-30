@@ -50,6 +50,8 @@ public class PlayingScene implements Drawable {
         this.layout = new Pane();
         this.sceneManager = sceneManager;
 
+        client.setPressedForfeit(false);
+        client.setInGame(true);
 
         drawBoard(pov);
         Chat chat = new Chat(tileLength,client,layout,sceneManager,this);

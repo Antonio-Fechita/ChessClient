@@ -69,8 +69,13 @@ public class Piece {
                 client.setLatestCommand("move " + tile + "-" + destinationTile);
 
                 String response;
+                long currentNano = System.nanoTime();
                 do {
                     response = client.getLatestResponse();
+                    if(((System.nanoTime()-currentNano)/1000000000.0f) > 0.1f)
+                    {
+                        response = "INVALID MOVE!";
+                    }
                 } while (!response.startsWith("PLEASE") && !response.startsWith("INVALID MOVE") && !response.startsWith("MOVE"));
 
                 if (response.equals("MOVE WAS APPLIED!")) { //if move is allowed by server
