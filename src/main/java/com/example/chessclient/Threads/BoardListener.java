@@ -1,6 +1,8 @@
 package com.example.chessclient.Threads;
 
 import com.example.chessclient.Client;
+import com.example.chessclient.Drawing.Enums.ChessColor;
+import com.example.chessclient.Drawing.Enums.ChessPiece;
 import com.example.chessclient.Drawing.Enums.TableOrientation;
 import com.example.chessclient.Drawing.Scenes.Chat;
 import com.example.chessclient.Drawing.Scenes.PlayingScene;
@@ -64,7 +66,8 @@ public class BoardListener implements Runnable {
             if (!response.startsWith("%")) {
                 if (!response.equals("--idle--") && !response.equals("MOVE WAS APPLIED!") &&
                         !response.equals("MESSAGE SENT!") && !response.equals("Make a move!")
-                        && !response.equals("Wrong command") && !response.equals("!notingame!")) {
+                        && !response.equals("Wrong command") && !response.equals("!notingame!")
+                        && !response.equals("MOVE WAS APPLIED! *!pawn upgraded")) {
                     int numberOfMessagesReceived = client.getNumberOfMessagesReceived();
                     if (numberOfMessagesReceived != numberOfServerMessages) {
                         Platform.runLater(() -> chat.addMessage(response, false, false, chat.getContentsOfScrollPane()));
@@ -144,6 +147,11 @@ public class BoardListener implements Runnable {
                         Platform.runLater(() -> {
                             playingScene.removePiece(pieceToBeRemoved);
                             piece.placePieceAtTile(lastMove.substring(3), playingScene.getPov(), playingScene.getTileLength());
+                            if (piece.getPiece().equals(ChessPiece.PAWN) &&
+                                    ((piece.getTile().charAt(1) == '8' && piece.getColor().equals(ChessColor.WHITE)) ||
+                                            (piece.getTile().charAt(1) == '1' && piece.getColor().equals(ChessColor.BLACK)))){
+                                piece.promote();
+                            }
                         });
                     }
                     lastKnownNumberOfMoves = numberOfMoves;

@@ -34,7 +34,11 @@ public class SceneManager extends Application {
     @Override
     public void stop(){
 
-        System.out.println("M-am oprit bro");
+        String response;
+        client.setLatestCommand("forfeit");
+        do{
+            response = client.getLatestResponse();
+        }while (!response.equals("You must be in game to forfeit!") && !response.equals("YOU HAVE FORFEITED THE GAME"));
         client.setLatestCommand("exit");
         System.exit(1);
     }
@@ -51,7 +55,7 @@ public class SceneManager extends Application {
             case REGISTER_SCENE -> stage.setScene(new RegisterScene(this).getScene());
             case MAIN_MENU_SCENE -> stage.setScene(new MainMenu(this).getScene());
             case HISTORY_SCENE -> stage.setScene(new HistoryScene(client,this).getScene());
-            case REPLAY_SCENE -> stage.setScene(new ReplayScene(100,this).getScene());
+            case REPLAY_SCENE -> stage.setScene(new ReplayScene(120,this).getScene());
         }
     }
 

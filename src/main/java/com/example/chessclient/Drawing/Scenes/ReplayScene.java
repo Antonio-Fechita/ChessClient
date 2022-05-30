@@ -9,7 +9,7 @@ import com.example.chessclient.Drawing.Enums.TableOrientation;
 import com.example.chessclient.Drawing.SceneManager;
 import com.example.chessclient.Piece;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -30,12 +30,16 @@ public class ReplayScene implements Drawable {
     Client client;
     List<Piece> pieces;
     List<Piece> eatenPieces;
+    List<Boolean> promotion;
     SceneManager sceneManager;
     Scene scene;
     int currentMove;
     String[] moves;
 
-    Button forwardButton,backwardButton, backButton;
+    boolean forwardDisabled = false;
+    boolean backwardDisabled = true;
+
+//    Button forwardButton,backwardButton, backButton;
 
     public ReplayScene(int tileLength, SceneManager sceneManager) {
         this.tileLength = tileLength;
@@ -43,13 +47,14 @@ public class ReplayScene implements Drawable {
         this.client = sceneManager.getClient();
         this.pieces = new ArrayList<>();
         this.eatenPieces = new ArrayList<>();
+        this.promotion = new ArrayList<>();
         this.layout = new Pane();
         this.currentMove = 0;
 
         String history;
-        do{
+        do {
             history = client.getLatestResponse();
-        }while (!history.startsWith("matchRep:"));
+        } while (!history.startsWith("matchRep:"));
 
 
         history = history.substring(9);
@@ -59,72 +64,81 @@ public class ReplayScene implements Drawable {
         drawBoard(TableOrientation.WHITE_PLAYING);
         placePieces(TableOrientation.WHITE_PLAYING);
 
-        forwardButton = new Button("->");
-        forwardButton.setOnAction(actionEvent -> onForwardButtonPress());
-        forwardButton.setLayoutX(4 * tileLength);
-        forwardButton.setLayoutY(8.5 * tileLength);
-
-        backwardButton = new Button("<-");
-        backwardButton.setOnAction(actionEvent -> onBackwardButtonPress());
-        backwardButton.setLayoutX(forwardButton.getLayoutX() - 50);
-        backwardButton.setLayoutY(forwardButton.getLayoutY());
-
-        backButton = new Button("Back");
-        backButton.setOnAction(actionEvent -> {
-            try {
-                onBackButtonPress();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        backButton.setLayoutX(20);
-        backButton.setLayoutY(forwardButton.getLayoutY());
-
-        backwardButton.setDisable(true);
-        if(history.equals("null"))
-            forwardButton.setDisable(true);
-        else{
+        backwardDisabled = true;
+        if (history.equals("null"))
+            forwardDisabled = true;
+        else {
             moves = history.split("/");
         }
 
-        layout.getChildren().add(forwardButton);
-        layout.getChildren().add(backwardButton);
-        layout.getChildren().add(backButton);
+//        layout
 
-        scene = new Scene(layout,8 * tileLength,9 * tileLength);
+        scene = new Scene(layout, 8 * tileLength, 8 * tileLength);
+        scene.setOnKeyPressed(e -> {
+            System.out.println("PRESSED");
+            if (e.getCode() == KeyCode.RIGHT) {
+                if (!forwardDisabled)
+                    onForwardButtonPress();
+            } else if (e.getCode() == KeyCode.LEFT) {
+                if (!backwardDisabled)
+                    onBackwardButtonPress();
+            } else if (e.getCode() == KeyCode.ESCAPE) {
+                try {
+                    onBackButtonPress();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
     }
 
-    private void onForwardButtonPress(){
+    private void onForwardButtonPress() {
 
-        Piece piece = getPieceAtTile(moves[currentMove].substring(0,2),true);
-        Piece eatenPiece = getPieceAtTile(moves[currentMove].substring(3),true);
-        piece.placePieceAtTile(moves[currentMove].substring(3),TableOrientation.WHITE_PLAYING,tileLength);
-        if(eatenPiece!=null){
+        Piece piece = getPieceAtTile(moves[currentMove].substring(0, 2), true);
+        Piece eatenPiece = getPieceAtTile(moves[currentMove].substring(3), true);
+        piece.placePieceAtTile(moves[currentMove].substring(3), TableOrientation.WHITE_PLAYING, tileLength);
+
+        if (piece.getPiece().equals(ChessPiece.PAWN) &&
+                ((piece.getTile().charAt(1) == '8' && piece.getColor().equals(ChessColor.WHITE)) ||
+                        (piece.getTile().charAt(1) == '1' && piece.getColor().equals(ChessColor.BLACK)))){
+            piece.promote();
+            if(promotion.size()==currentMove)
+                promotion.add(true);
+        } else if (promotion.size()==currentMove) {
+            promotion.add(false);
+        }
+
+        if (eatenPiece != null) {
             eatenPiece.getImageView().setVisible(false);
         }
 
-        if(currentMove == eatenPieces.size())
+        if (currentMove == eatenPieces.size())
             eatenPieces.add(eatenPiece);
 
         currentMove++;
-        backwardButton.setDisable(false);
-        if(currentMove == moves.length)
-            forwardButton.setDisable(true);
+        backwardDisabled = false;
+        if (currentMove == moves.length)
+            forwardDisabled = true;
 
     }
 
-    private void onBackwardButtonPress(){
-        Piece piece = getPieceAtTile(moves[currentMove-1].substring(3),true);
-        Piece eatenPiece = eatenPieces.get(currentMove-1);
-        piece.placePieceAtTile(moves[currentMove-1].substring(0,2),TableOrientation.WHITE_PLAYING,tileLength);
-        if(eatenPiece!=null){
+    private void onBackwardButtonPress() {
+        Piece piece = getPieceAtTile(moves[currentMove - 1].substring(3), true);
+        Piece eatenPiece = eatenPieces.get(currentMove - 1);
+        piece.placePieceAtTile(moves[currentMove - 1].substring(0, 2), TableOrientation.WHITE_PLAYING, tileLength);
+
+        if(promotion.get(currentMove-1)){
+            piece.demote();
+        }
+
+        if (eatenPiece != null) {
             eatenPiece.getImageView().setVisible(true);
         }
 
         currentMove--;
-        forwardButton.setDisable(false);
-        if(currentMove==0)
-            backwardButton.setDisable(true);
+        forwardDisabled = false;
+        if (currentMove == 0)
+            backwardDisabled = true;
     }
 
     private void onBackButtonPress() throws IOException {
@@ -239,9 +253,9 @@ public class ReplayScene implements Drawable {
         }
     }
 
-    public Piece getPieceAtTile(String tile, boolean lookForVisible){
-        for(Piece piece : pieces){
-            if(piece.getTile().equals(tile) && ((piece.getImageView().isVisible() && lookForVisible) || (!piece.getImageView().isVisible() && !lookForVisible)))
+    public Piece getPieceAtTile(String tile, boolean lookForVisible) {
+        for (Piece piece : pieces) {
+            if (piece.getTile().equals(tile) && ((piece.getImageView().isVisible() && lookForVisible) || (!piece.getImageView().isVisible() && !lookForVisible)))
                 return piece;
         }
         return null;

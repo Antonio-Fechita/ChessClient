@@ -35,7 +35,7 @@ public class Piece {
         this.playingScene = playingScene;
         imageView = getPieceImageView(color, piece, tileLength);
 
-        if(playingScene!=null)
+        if (playingScene != null)
             applyMouseEventsToPieceImage(imageView, tileLength, tableOrientation, client);
         layout.getChildren().add(imageView);
         tile = initialTile;
@@ -47,11 +47,17 @@ public class Piece {
         return imageView;
     }
 
+    public void setImageView(ImageView imageView) {
+        this.imageView = imageView;
+    }
+
     public void applyMouseEventsToPieceImage(ImageView imageView, int tileLength, TableOrientation tableOrientation, Client client) {
         imageView.setOnMouseDragged(mouseEvent -> {
 
 
 //            imageView.setViewOrder(-1);
+
+//            imageView = get
 
             imageView.setX(mouseEvent.getX() - tileLength / 2);
             imageView.setY(mouseEvent.getY() - tileLength / 2);
@@ -72,26 +78,45 @@ public class Piece {
                 long currentNano = System.nanoTime();
                 do {
                     response = client.getLatestResponse();
-                    if(((System.nanoTime()-currentNano)/1000000000.0f) > 0.1f)
-                    {
+                    if (((System.nanoTime() - currentNano) / 1000000000.0f) > 0.1f) {
                         response = "INVALID MOVE!";
                     }
                 } while (!response.startsWith("PLEASE") && !response.startsWith("INVALID MOVE") && !response.startsWith("MOVE"));
 
-                if (response.equals("MOVE WAS APPLIED!")) { //if move is allowed by server
+                if (response.startsWith("MOVE WAS APPLIED!")) { //if move is allowed by server
                     Piece pieceToBeRemoved = playingScene.getPieceAtTile(destinationTile);
                     playingScene.removePiece(pieceToBeRemoved);
                     placePieceAtTile(getTileFromCoordinates((int) mouseEvent.getX(), (int) mouseEvent.getY(), tableOrientation, tileLength), tableOrientation, tileLength);
+
+                    if (response.equals("MOVE WAS APPLIED! *!pawn upgraded")) {
+                        promote();
+                    }
+
+
                 } else {
                     placePieceAtTile(tile, tableOrientation, tileLength);
                 }
-            }
-            else
+            } else
                 placePieceAtTile(tile, tableOrientation, tileLength);
 //            imageView.setViewOrder(0);
         });
     }
 
+    public void promote(){
+        if (color.equals(ChessColor.WHITE))
+            imageView.setImage(new Image("file:src\\main\\java\\com\\example\\chessclient\\Images\\Pieces\\White\\queen.png"));
+        else{
+            imageView.setImage(new Image("file:src\\main\\java\\com\\example\\chessclient\\Images\\Pieces\\Black\\queen.png"));
+        }
+    }
+
+    public void demote(){
+        if (color.equals(ChessColor.WHITE))
+            imageView.setImage(new Image("file:src\\main\\java\\com\\example\\chessclient\\Images\\Pieces\\White\\pawn.png"));
+        else{
+            imageView.setImage(new Image("file:src\\main\\java\\com\\example\\chessclient\\Images\\Pieces\\Black\\pawn.png"));
+        }
+    }
 
     private String getTileFromCoordinates(int xPos, int yPos, TableOrientation tableOrientation, int tileLength) {
         char column;
