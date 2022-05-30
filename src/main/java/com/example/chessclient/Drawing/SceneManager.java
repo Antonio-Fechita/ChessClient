@@ -35,10 +35,12 @@ public class SceneManager extends Application {
     public void stop(){
 
         String response;
-        client.setLatestCommand("forfeit");
-        do{
-            response = client.getLatestResponse();
-        }while (!response.equals("You must be in game to forfeit!") && !response.equals("YOU HAVE FORFEITED THE GAME"));
+        if(client.isInGame()){
+            client.setLatestCommand("forfeit");
+            do{
+                response = client.getLatestResponse();
+            }while (!response.equals("You must be in game to forfeit!") && !response.equals("YOU HAVE FORFEITED THE GAME"));
+        }
         client.setLatestCommand("exit");
         System.exit(1);
     }

@@ -4,6 +4,9 @@ import com.example.chessclient.Client;
 import com.example.chessclient.Drawable;
 import com.example.chessclient.Drawing.Enums.AvailableScene;
 import com.example.chessclient.Drawing.SceneManager;
+import com.example.chessclient.Exceptions.BlankFieldException;
+import com.example.chessclient.Exceptions.PasswordMatchingException;
+import com.example.chessclient.Exceptions.RegistrationFailException;
 import com.example.chessclient.Utils.Utilities;
 import javafx.animation.FadeTransition;
 import javafx.animation.SequentialTransition;
@@ -38,7 +41,7 @@ public class RegisterScene implements Drawable {
     TextField passwordTextField = new PasswordField();
     TextField passwordConfirmationTextField = new PasswordField();
     Client client;
-    Text wrongDataText = new Text("Passwords don't match");
+    Text wrongDataText = new Text("Registration failed");
     Rectangle wrongDataTextBackground = new Rectangle();
     Group wrongPasswordGroup = new Group();
 
@@ -97,8 +100,8 @@ public class RegisterScene implements Drawable {
 
         wrongDataTextBackground.setX(wrongDataText.getX() - 20);
         wrongDataTextBackground.setY(wrongDataText.getY() - 30);
-        wrongDataTextBackground.setWidth(170);
-        wrongDataTextBackground.setHeight(45);
+        wrongDataTextBackground.setWidth(Utilities.getTextWidth(wrongDataText) + 40);
+        wrongDataTextBackground.setHeight(Utilities.getTextHeight(wrongDataText) + 30);
         wrongDataTextBackground.setFill(Color.RED);
 
         wrongPasswordGroup.getChildren().add(wrongDataTextBackground);
@@ -141,29 +144,37 @@ public class RegisterScene implements Drawable {
         String username = usernameTextField.getText();
         String password = passwordTextField.getText();
         String confirmedPassword = passwordConfirmationTextField.getText();
+        try{
         if (!password.equals(confirmedPassword)) {
+            throw new PasswordMatchingException();
+        } else
+            if(username.isBlank() || password.isBlank()) {
+                throw new BlankFieldException();
+            }
+            else {
+                client.setLatestCommand("register " + username + " " + password);
+                String response;
+                do {
+                    response = client.getLatestResponse();
+                } while (!response.startsWith("USER") && !response.startsWith("REGISTRATION"));
+
+                if (response.startsWith("USER")) { //registration successful
+
+                    client.setLatestCommand("login " + username + " " + password);
+                    do {
+                        response = client.getLatestResponse();
+                    } while (!response.startsWith("#@Tkn%"));
+
+                    sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+                } else { //registration failed
+                    throw new RegistrationFailException();
+                }
+            }
+
+        }catch (BlankFieldException | PasswordMatchingException | RegistrationFailException e){
             FadeTransition fader = createFader(wrongPasswordGroup);
             SequentialTransition transition = new SequentialTransition(wrongPasswordGroup, fader);
             transition.play();
-        } else {
-            client.setLatestCommand("register " + username + " " + password);
-            String response;
-            do {
-                response = client.getLatestResponse();
-            } while (!response.startsWith("USER") && !response.startsWith("REGISTRATION"));
-
-            if (response.startsWith("USER")) { //registration successful
-
-                client.setLatestCommand("login " + username + " " + password);
-                do {
-                    response = client.getLatestResponse();
-                } while (!response.startsWith("#@Tkn%"));
-
-                sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
-            } else { //registration failed
-                System.out.println("Registration failed");
-            }
-
         }
 
     }

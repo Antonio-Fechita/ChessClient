@@ -75,7 +75,6 @@ public class ReplayScene implements Drawable {
 
         scene = new Scene(layout, 8 * tileLength, 8 * tileLength);
         scene.setOnKeyPressed(e -> {
-            System.out.println("PRESSED");
             if (e.getCode() == KeyCode.RIGHT) {
                 if (!forwardDisabled)
                     onForwardButtonPress();

@@ -4,6 +4,8 @@ import com.example.chessclient.Client;
 import com.example.chessclient.Drawable;
 import com.example.chessclient.Drawing.Enums.AvailableScene;
 import com.example.chessclient.Drawing.SceneManager;
+import com.example.chessclient.Exceptions.BlankFieldException;
+import com.example.chessclient.Exceptions.UserNotFoundException;
 import com.example.chessclient.Utils.Utilities;
 import javafx.animation.FadeTransition;
 import javafx.animation.SequentialTransition;
@@ -126,22 +128,37 @@ public class LoginScene implements Drawable {
     private void onLoginButtonPress() throws IOException {
         String username = usernameTextField.getText();
         String password = passwordTextField.getText();
+
+        try {
+            if (username.isBlank() || password.isBlank())
+                throw new BlankFieldException();
+
         client.setLatestCommand("login " + username + " " + password);
+        System.out.println("sending command: login " + username + " " + password);
 
         String response;
         do{
             response = client.getLatestResponse();
-        }while (!response.startsWith("Wrong") && !response.startsWith("#@Tkn%"));
+        }while (!response.startsWith("#@Tkn%") && !response.equals("Nu exista acest cont!"));
 
+        System.out.println("Got login response: " + response);
 
-        if (response.equals("Wrong command")) {
+            if (response.equals("Nu exista acest cont!")) {
 
-            FadeTransition fader = createFader(wrongDataGroup);
-            SequentialTransition transition = new SequentialTransition(wrongDataGroup, fader);
-            transition.play();
-        } else {
-            sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+                throw new UserNotFoundException();
+
+            } else {
+                sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+            }
+        } catch (UserNotFoundException | BlankFieldException e){
+            showWrongDataMessage();
         }
+    }
+
+    private void showWrongDataMessage(){
+        FadeTransition fader = createFader(wrongDataGroup);
+        SequentialTransition transition = new SequentialTransition(wrongDataGroup, fader);
+        transition.play();
     }
 
     private FadeTransition createFader(Node node) {

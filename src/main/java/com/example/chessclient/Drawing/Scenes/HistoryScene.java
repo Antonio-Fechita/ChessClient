@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -110,11 +111,18 @@ public class HistoryScene implements Drawable {
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: rgba(76, 175, 80, 0.3);-fx-background-radius: 25;-fx-background-size: 120, 120");
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
-//        drawHeaders(layout);
         layout.getChildren().add(scrollPane);
         scene = new Scene(layout,1500,1000);
         scene.getStylesheets().add(getClass().getResource("/button.css").toExternalForm());
-        System.out.println();
+        scene.setOnKeyPressed(e ->{
+            if(e.getCode() == KeyCode.ESCAPE) {
+                try {
+                    sceneManager.swapScene(AvailableScene.MAIN_MENU_SCENE);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
     }
 
 
